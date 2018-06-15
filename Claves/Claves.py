@@ -1,18 +1,16 @@
-
-
-
-# In[38]:
-
-
 import os
 import easygui as gui
 import pandas as pd
 import unicodedata as un
 
-
-# In[149]:
-
 def clean_string(text:str)->str:
+    t=[]
+    for char in text:
+        if ord(char)==8211:
+            t.append(chr(45))
+        else:
+            t.append(char)
+    text=''.join(t)
     text=text.lower().strip()
     if 'ñ' in text:
         text2=[]
@@ -35,10 +33,6 @@ def murcielago(text:str)->str:
             result.append(char)
     return ''.join(result)
 
-
-# In[150]:
-
-
 def carlina_betfuse(text:str)->str:
     result=[]
     carlina_str='carlina'
@@ -53,9 +47,19 @@ def carlina_betfuse(text:str)->str:
             result.append(char)
     return ''.join(result)
 
-
-# In[148]:
-
+def baden_powel(text:str)->str:
+    result=[]
+    baden_str='baden'
+    powel_str='powel'
+    text=clean_string(text)
+    for char in text:
+        if char in baden_str:
+            result.append(powel_str[baden_str.find(char)])
+        elif char in powel_str:
+            result.append(baden_str[powel_str.find(char)])
+        else:
+            result.append(char)
+    return ''.join(result)
 
 def dametupico(text:str)->str:
     result=[]
@@ -71,8 +75,33 @@ def dametupico(text:str)->str:
             result.append(char)
     return ''.join(result)
 
+def palerinofu (text:str)->str:
+    result=[]
+    pl_str='plrnf'
+    ae_str='aeiou'
+    text=clean_string(texts)
+    for char in text:
+        if char in pl_str:
+            result.append(ae_str[pl_str.find(char)])
+        elif char in ae_str:
+            result.append(pl_str[ae_str.find(char)])
+        else:
+            result.append(char)
+    return ''.join(result)
 
-# In[129]:
+def inversa(text:str)->str:
+    result=[]
+    inversa_str='abcdefghijklmn'
+    asrevni_str='zyxwvutsrqpoñn'
+    text=clean_string(text)
+    for char in text:
+        if char in inversa_str:
+            result.append(asrevni_str[inversa_str.find(char)])
+        elif char in asrevni_str:
+            result.append(inversa_str[asrevni_str.find(char)])
+        else:
+            result.append(char)
+    return ''.join(result)
 
 ''' Deprecated
 def argentina2_decode(text:str)->str:
@@ -140,16 +169,13 @@ def argentina_decode(text:str)->str:
                     result.append(arg_df.loc[key[1:],key[0]])
                 else:
                     result.append(arg_df.loc[key[2:],key[:2]])
-                key=[]
             except (IndexError,KeyError):
                 result.append(key+char)
+            finally:
                 key=[]
     for i in key:
         result.append(i)
     return ''.join(result).strip()
-
-
-# In[141]:
 
 ''' Deprecated
 def argentina2_encode(text:str)->str:
@@ -170,6 +196,7 @@ def argentina2_encode(text:str)->str:
             result.append(char)
     return ''.join(result)
 '''
+
 def argentina_encode(text:str)->str:
     result=[]
     arg_df=pd.DataFrame(data=[list('abcdefghi'),list('jklmnñopq'),list('rstuvwxyz')],index=['i','ii','iii'],columns=['a','r','g','e','n','t','i','n2','a2'])
@@ -185,13 +212,118 @@ def argentina_encode(text:str)->str:
             result.append(char)
     return ''.join(result)
 
-# In[151]:
+def antilopes_decode(text:str)->str:
+    result=[]
+    key=[]
+    ant_df=pd.DataFrame(data=[list('abcdefghi'),list('jklmnñopq'),list('rstuvwxyz')],index=['i','ii','iii'],columns=['a','n','t','i','l','o','p','e','s'])
+    text=clean_string(text)
+    for char in text:
+        if char==' ':
+            for i in ''.join(key)+char:
+                result.append(i)
+            key=[]
+        elif char!='/':
+            key.append(char)
+        else:
+            key=''.join(key)
+            try:
+                result.append(ant_df.loc[key[1:],key[0]])
+            except (IndexError,KeyError):
+                result.append(key+char)
+            finally:
+                key=[]
+    for i in key:
+        result.append(i)
+    return ''.join(result).strip()
 
+def antilopes_encode(text:str)->str:
+    result=[]
+    arg_df=pd.DataFrame(data=[list('abcdefghi'),list('jklmnñopq'),list('rstuvwxyz')],index=['i','ii','iii'],columns=['a','n','t','i','l','o','p','e','s'])
+    text=clean_string(text)
+    for char in text:
+        found=False
+        for i in range(len(ant_df.index)):
+            for j in range(len(ant_df.columns)):
+                if ant_df.iloc[i,j]==char:
+                    found=True
+                    result.append(f'{ant_df.columns[j]}{ant_df.index[i]}/')
+        if found==False:
+            result.append(char)
+    return ''.join(result)
 
-murcielago('0123456789 murcielagó')
+def morse(text:str)->str:
+    result=[]
+    abc_str='abcdefghijklmnñopqrstuvwxyz0123456789.,?'
+    mor_str=['.-', '-...', '-.-.', '-..', '.', '..-.', '--.', '....', '..',
+        '.---', '-.-', '.-..', '--', '-.', '--.--', '---', '.--.', '--.-',
+        '.-.', '...', '-', '..-', '...-', '.--', '-..-', '-.--', '--..',
+        '-----', '.----', '..---', '...--', '....-', '.....', '-....', '--...',
+        '---..', '----.', '.-.-.-', '--..--', '..--..']
+    text=clean_string(text)
+    for char in text:
+        if char in '.-/ ':
+            morse=True
+        else:
+            morse=False
+            break
+    if morse:
+        text=text.split('/')
+        for i in range(len(text)):
+            text[i]=text[i].strip()
+        text=' / '.join(text).split(' ')
+        for char in text:
+            if char in mor_str:
+                result.append(abc_str[mor_str.index(char)])
+            elif char=='/':
+                result.append(' ')
+            else:
+                result.append(char)
+    else:
+        for char in text:
+            if char in abc_str:
+                result.append(mor_str[abc_str.find(char)]+' ')
+            elif char==' ':
+                result.append(' / ')
+            else:
+                result.append(char)
+    return ''.join(result)
 
+def brujula_encode(text:str)->str:
+    result=[]
+    brj_df=pd.DataFrame(data=[list('aeimptx'),list('bfjnquy'),list('cgkñrvz'),list('dhlosw')],index=['N','E','S','O'],columns=[f'{i}' for i in range(1,8)])
+    text=clean_string(text)
+    for char in text:
+        found=False
+        for i in range(len(brj_df.index)):
+            for j in range(len(brj_df.columns)):
+                if brj_df.iloc[i,j]==char:
+                    found=True
+                    result.append(f'{brj_df.columns[j]}{brj_df.index[i]}/')
+        if found==False:
+            result.append(char)
+    return ''.join(result)
 
-# In[155]:
-
-
-dametupico('dametupico ademütipóc')
+def brujula_decode(text:str)->str:
+    result=[]
+    key=[]
+    brj_df=pd.DataFrame(data=[list('aeimptx'),list('bfjnquy'),list('cgkñrvz'),list('dhlosw')],index=['N','E','S','O'],columns=[f'{i}' for i in range(1,8)])
+    text=clean_string(text)
+    text=text.upper()
+    for char in text:
+        if char==' ':
+            for i in ''.join(key)+char:
+                result.append(i)
+            key=[]
+        elif char!='/':
+            key.append(char)
+        else:
+            key=''.join(key)
+            try:
+                result.append(brj_df.loc[key[1],key[0]])
+            except (IndexError,KeyError):
+                result.append(key+char)
+            finally:
+                key=[]
+    for i in key:
+        result.append(i)
+    return ''.join(result).strip()
