@@ -1,5 +1,4 @@
-import os
-import easygui as gui
+import tkinter as tk
 import pandas as pd
 import unicodedata as un
 
@@ -12,13 +11,10 @@ def clean_string(text:str)->str:
             t.append(char)
     text=''.join(t)
     text=text.lower().strip()
-    if 'ñ' in text:
-        text2=[]
-        for i in text.split('ñ'):
-            text2.append(un.normalize('NFKD',i).encode('ascii',errors='ignore').decode('utf-8'))
-        return 'ñ'.join(text2)
-    else:
-        return un.normalize('NFKD',text).encode('ascii',errors='ignore').decode('utf-8')
+    text2=[]
+    for i in text.split('ñ'):
+        text2.append(un.normalize('NFKD',i).encode('ascii',errors='ignore').decode('utf-8'))
+    return 'ñ'.join(text2)
 
 def murcielago(text:str)->str:
     murcielago_str='murcielago'
@@ -79,7 +75,7 @@ def palerinofu (text:str)->str:
     result=[]
     pl_str='plrnf'
     ae_str='aeiou'
-    text=clean_string(texts)
+    text=clean_string(text)
     for char in text:
         if char in pl_str:
             result.append(ae_str[pl_str.find(char)])
@@ -238,7 +234,7 @@ def antilopes_decode(text:str)->str:
 
 def antilopes_encode(text:str)->str:
     result=[]
-    arg_df=pd.DataFrame(data=[list('abcdefghi'),list('jklmnñopq'),list('rstuvwxyz')],index=['i','ii','iii'],columns=['a','n','t','i','l','o','p','e','s'])
+    ant_df=pd.DataFrame(data=[list('abcdefghi'),list('jklmnñopq'),list('rstuvwxyz')],index=['i','ii','iii'],columns=['a','n','t','i','l','o','p','e','s'])
     text=clean_string(text)
     for char in text:
         found=False
@@ -251,41 +247,43 @@ def antilopes_encode(text:str)->str:
             result.append(char)
     return ''.join(result)
 
-def morse(text:str)->str:
+def morse_decode(text:str)->str:
     result=[]
     abc_str='abcdefghijklmnñopqrstuvwxyz0123456789.,?'
-    mor_str=['.-', '-...', '-.-.', '-..', '.', '..-.', '--.', '....', '..',
+    mor_l=['.-', '-...', '-.-.', '-..', '.', '..-.', '--.', '....', '..',
+        '.---', '-.-', '.-..', '--', '-.', '--.--', '---', '.--.', '--.-',
+        '.-.', '...', '-', '..-', '...-', '.--', '-..-', '-.--', '--..',
+        '-----', '.----', '..---', '...--', '....-', '.....', '-....', '--...',
+        '---..', '----.', '.-.-.-', '--..--', '..--..']
+    text=clean_string(text).split('/')
+    for i in range(len(text)):
+        text[i]=text[i].strip()
+    text=' / '.join(text).split(' ')
+    for char in text:
+        if char in mor_l:
+            result.append(abc_str[mor_l.index(char)])
+        elif char=='/':
+            result.append(' ')
+        else:
+            result.append(char)
+    return ''.join(result)
+
+def morse_encode(text:str)->str:
+    result=[]
+    abc_str='abcdefghijklmnñopqrstuvwxyz0123456789.,?'
+    mor_l=['.-', '-...', '-.-.', '-..', '.', '..-.', '--.', '....', '..',
         '.---', '-.-', '.-..', '--', '-.', '--.--', '---', '.--.', '--.-',
         '.-.', '...', '-', '..-', '...-', '.--', '-..-', '-.--', '--..',
         '-----', '.----', '..---', '...--', '....-', '.....', '-....', '--...',
         '---..', '----.', '.-.-.-', '--..--', '..--..']
     text=clean_string(text)
     for char in text:
-        if char in '.-/ ':
-            morse=True
+        if char in abc_str:
+            result.append(mor_l[abc_str.find(char)]+' ')
+        elif char==' ':
+            result.append(' / ')
         else:
-            morse=False
-            break
-    if morse:
-        text=text.split('/')
-        for i in range(len(text)):
-            text[i]=text[i].strip()
-        text=' / '.join(text).split(' ')
-        for char in text:
-            if char in mor_str:
-                result.append(abc_str[mor_str.index(char)])
-            elif char=='/':
-                result.append(' ')
-            else:
-                result.append(char)
-    else:
-        for char in text:
-            if char in abc_str:
-                result.append(mor_str[abc_str.find(char)]+' ')
-            elif char==' ':
-                result.append(' / ')
-            else:
-                result.append(char)
+            result.append(char)
     return ''.join(result)
 
 def brujula_encode(text:str)->str:
@@ -327,3 +325,114 @@ def brujula_decode(text:str)->str:
     for i in key:
         result.append(i)
     return ''.join(result).strip()
+
+def execute_command():
+    t_salida.delete(1.0,tk.END)
+    if v_clave.get()==1:
+        t_salida.insert(tk.END,murcielago(t_entrada.get(1.0,tk.END)))
+    elif v_clave.get()==2:
+        t_salida.insert(tk.END,carlina_betfuse(t_entrada.get(1.0,tk.END)))
+    elif v_clave.get()==3:
+        t_salida.insert(tk.END,baden_powel(t_entrada.get(1.0,tk.END)))
+    elif v_clave.get()==4:
+        t_salida.insert(tk.END,dametupico(t_entrada.get(1.0,tk.END)))
+    elif v_clave.get()==5:
+        t_salida.insert(tk.END,palerinofu(t_entrada.get(1.0,tk.END)))
+    elif v_clave.get()==6:
+        t_salida.insert(tk.END,inversa(t_entrada.get(1.0,tk.END)))
+    elif v_clave.get()==7:
+        if v_accion.get()==1:
+            t_salida.insert(tk.END,argentina_encode(t_entrada.get(1.0,tk.END)))
+        elif v_accion.get()==2:
+            t_salida.insert(tk.END,argentina_decode(t_entrada.get(1.0,tk.END)))
+        else:
+            t_salida.insert(tk.END,'Error identificando acción')
+    elif v_clave.get()==8:
+        if v_accion.get()==1:
+            t_salida.insert(tk.END,antilopes_encode(t_entrada.get(1.0,tk.END)))
+        elif v_accion.get()==2:
+            t_salida.insert(tk.END,antilopes_decode(t_entrada.get(1.0,tk.END)))
+        else:
+            t_salida.insert(tk.END,'Error identificando acción')
+    elif v_clave.get()==9:
+        if v_accion.get()==1:
+            t_salida.insert(tk.END,morse_encode(t_entrada.get(1.0,tk.END)))
+        elif v_accion.get()==2:
+            t_salida.insert(tk.END,morse_decode(t_entrada.get(1.0,tk.END)))
+        else:
+            t_salida.insert(tk.END,'Error identificando acción')
+    elif v_clave.get()==10:
+        if v_accion.get()==1:
+            t_salida.insert(tk.END,brujula_encode(t_entrada.get(1.0,tk.END)))
+        elif v_accion.get()==2:
+            t_salida.insert(tk.END,brujula_decode(t_entrada.get(1.0,tk.END)))
+        else:
+            t_salida.insert(tk.END,'Error identificando accion')
+    else:
+        t_salida.insert(tk.END,'Error identificando clave')
+
+def close(master):
+    master.destroy()
+    exit()
+
+window=tk.Tk()
+window.wm_title('Claves Scout por Sebastian Demelas')
+
+l_claves=tk.Label(window,text='Claves:')
+l_accion=tk.Label(window,text='Acción:')
+l_entrada=tk.Label(window,text='Entrada:')
+l_salida=tk.Label(window,text='Salida:')
+l_claves.grid(row=0,column=0)
+l_accion.grid(row=3,column=0)
+l_entrada.grid(row=5,column=0)
+l_salida.grid(row=7,column=0)
+
+v_clave=tk.IntVar()
+r_murcielago=tk.Radiobutton(window,text='Murciélago',variable=v_clave,value=1)
+r_carlina=tk.Radiobutton(window,text='Carlina Betfuse',variable=v_clave,value=2)
+r_baden=tk.Radiobutton(window,text='Baden Powel',variable=v_clave,value=3)
+r_dametupico=tk.Radiobutton(window,text='Dametupico',variable=v_clave,value=4)
+r_palerinofu=tk.Radiobutton(window,text='Palerinofu',variable=v_clave,value=5)
+r_inversa=tk.Radiobutton(window,text='Inversa',variable=v_clave,value=6)
+r_argentina=tk.Radiobutton(window,text='Argentina',variable=v_clave,value=7)
+r_antilopes=tk.Radiobutton(window,text='Antilopes',variable=v_clave,value=8)
+r_morse=tk.Radiobutton(window,text='Morse',variable=v_clave,value=9)
+r_brujula=tk.Radiobutton(window,text='Brújula',variable=v_clave,value=10)
+r_murcielago.grid(row=1,column=0)
+r_carlina.grid(row=1,column=1)
+r_baden.grid(row=1,column=2)
+r_dametupico.grid(row=1,column=3)
+r_palerinofu.grid(row=1,column=4)
+r_inversa.grid(row=2,column=0)
+r_argentina.grid(row=2,column=1)
+r_antilopes.grid(row=2,column=2)
+r_morse.grid(row=2,column=3)
+r_brujula.grid(row=2,column=4)
+
+v_accion=tk.IntVar()
+r_encode=tk.Radiobutton(window,text='Codificar',variable=v_accion,value=1)
+r_decode=tk.Radiobutton(window,text='Decodificar',variable=v_accion,value=2)
+r_encode.grid(row=4,column=0)
+r_decode.grid(row=4,column=1)
+
+t_entrada=tk.Text(window,height=6,width=60)
+t_salida=tk.Text(window,height=6,width=60)
+t_entrada.grid(row=6,column=0,columnspan=10)
+t_salida.grid(row=8,column=0,columnspan=10)
+
+scrl_entrada=tk.Scrollbar(window)
+scrl_salida=tk.Scrollbar(window)
+scrl_entrada.grid(row=6,column=10)
+scrl_salida.grid(row=8,column=10)
+
+t_entrada.configure(yscrollcommand=scrl_entrada.set)
+t_salida.configure(yscrollcommand=scrl_salida.set)
+scrl_entrada.configure(command=t_entrada.yview)
+scrl_salida.configure(command=t_salida.yview)
+
+b_ejecutar=tk.Button(window,text='Ejecutar',command=execute_command,width=12)
+b_close=tk.Button(window,text='Cerrar',command=lambda x=window:close(x))
+b_ejecutar.grid(row=6,column=11)
+b_close.grid(row=8,column=11)
+
+window.mainloop()

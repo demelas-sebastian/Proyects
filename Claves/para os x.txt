@@ -1,0 +1,3 @@
+http://docs.python-guide.org/en/latest/shipping/freezing/
+PyInstaller
+https://techsviewer.com/install-macos-sierra-vmware-windows/
