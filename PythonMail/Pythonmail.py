@@ -1,4 +1,5 @@
 import smtplib
+import ssl
 import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -12,9 +13,6 @@ from tkinter import messagebox
 def send_mail(subject,from_addr,to_addr,html_msg,att_filename=None):
     msg=MIMEMultipart()
 
-    #msg['Subject']='Some HTML mail'
-    #msg['From']='sdemelas@scouts.org.ar'
-    #msg['To']='sdemelas@scouts.org.ar'
     msg['Subject']=subject
     msg['From']=from_addr
     msg['To']=to_addr
@@ -31,16 +29,17 @@ def send_mail(subject,from_addr,to_addr,html_msg,att_filename=None):
 
     server=smtplib.SMTP('smtp.office365.com',587)
     server.ehlo()
-    server.starttls()
-    server.login('sdemelas@scouts.org.ar',base64.b64decode('MUYxaTJiM28=').decode('utf8'))
+    context=ssl.create_default_context()
+    server.starttls(context=context)
+    server.login(USER,PASS)
     server.sendmail(msg['From'],msg['To'],msg.as_string())
     server.quit()
 
 #when attach button pressed
-def attach():
-    filename=filedialog.askopenfilename()
-    t_body.delete(1.0,tk.END)
-    t_body.insert(tk.END,filename.split('/')[-1])
+def attach(self):
+    self.filename=filedialog.askopenfilename()
+    self.t_body.delete(1.0,tk.END)
+    self.t_body.insert(tk.END,filename.split('/')[-1])
 
 def login(window):
     try:
@@ -61,13 +60,11 @@ def login(window):
 def w_login():
     login_window=tk.Tk()
 
-    l_user=tk.Label(login_window,text='User')
-    l_pass=tk.Label(login_window,text='Pass')
-    l_user.grid(row=0,column=0)
-    l_pass.grid(row=0,column=1)
+    login_window.l_user=tk.Label(login_window,text='User')
+    login_window.l_pass=tk.Label(login_window,text='Pass')
+    login_window.l_user.grid(row=0,column=0)
+    login_window.l_pass.grid(row=0,column=1)
 
-    login_window.v_user=tk.StringVar()
-    login_window.v_pass=tk.StringVar()
     login_window.e_user=tk.Entry(login_window,textvariable=login_window.v_user)
     login_window.e_pass=tk.Entry(login_window,textvariable=login_window.v_pass)
     login_window.e_user.grid(row=1,column=0)
@@ -80,12 +77,12 @@ def w_login():
 
 window=tk.Tk()
 
-b_login=tk.Button(window,text='Iniciar sesión',command=w_login)
-b_attach=tk.Button(window,text='Adjuntar archivo',command=attach)
-b_login.grid(row=0,column=0)
-b_attach.grid(row=1,column=0)
+window.b_login=tk.Button(window,text='Iniciar sesión',command=w_login)
+window.b_attach=tk.Button(window,text='Adjuntar archivo',command=attach)
+window.b_login.grid(row=0,column=0)
+window.b_attach.grid(row=1,column=0)
 
-t_body=tk.Text(window,height=6,width=60)
-t_body.grid(row=2,column=0)
+window.t_body=tk.Text(window,height=6,width=60)
+window.t_body.grid(row=2,column=0)
 
 window.mainloop()
