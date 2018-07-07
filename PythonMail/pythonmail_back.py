@@ -1,4 +1,4 @@
-import sys
+import sys,os,traceback
 import smtplib
 import ssl
 from email.mime.text import MIMEText
@@ -7,31 +7,68 @@ from email.mime.application import MIMEApplication
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+import keyring
 
 #consider using Outlook REST API instead of storing passwords
+#using keyring for pass storage... for now
 
-#for storing passwords use:
-#https://pypi.org/project/keyring/#description
-#https://nakedsecurity.sophos.com/2013/11/20/serious-security-how-to-store-your-users-passwords-safely/
-#https://pypi.org/project/bcrypt/
-#http://dustwell.com/how-to-handle-passwords-bcrypt.html
-#actually this:
-#https://stackoverflow.com/questions/7014953/i-need-to-securely-store-a-username-and-password-in-python-what-are-my-options
-#https://stackoverflow.com/questions/12042724/securely-storing-passwords-for-use-in-python-script
+USER_RECOVER_KEY='magical_user_recovering_key' #maybe change this to a hash generated at runtime?
+
 class Login(object):
     def login(self):
+        self.e_user.config(state=tk.DISABLED)
+        self.e_pass.config(state=tk.DISABLED)
+        exc_info=[]
         try:
             server=smtplib.SMTP('smtp.office365.com',587)
             server.ehlo()
             context=ssl.create_default_context()
             server.starttls(context=context)
             server.login(self.e_user.get(),self.e_pass.get())
+            keyring.set_password(self.service_name,self.e_user.get(),self.e_pass.get())
+            keyring.set_password(self.service_name,USER_RECOVER_KEY,self.e_user.get())
             server.quit()
-            return 'SUCCESS'
+            return ('SUCCESS',0,0)
         except smtplib.SMTPAuthenticationError:
-            messagebox.showerror('Error de autenticación','Error en usuario/contraseña.')
-            return 'AUTH_ERROR'
-        except Exception as err:
-            tb=sys.exec_info()[2]
-            messagebox.showerror('Error desconocido',tb+'\n'+err)
-            return 'UNKN_ERROR'
+            exc_info=[i for i in sys.exc_info()]
+            exc_info.append('AUTH_ERROR')
+        except keyring.errors.PasswordSetError:
+            exc_info=[i for i in sys.exc_info()]
+            exc_info.append('CRYPT_ERROR')
+        except Exception:
+            exc_info=[i for i in sys.exc_info()]
+            exc_info.append('UNKN_ERROR')
+        finally:
+            self.e_user.config(state=tk.NORMAL)
+            self.e_pass.config(state=tk.NORMAL)
+            if not exc_info==[]:
+                error_instance=exc_info[1].__repr__()
+                traceback.print_tb(exc_info[2],file=open('trace.txt','w+'))
+                trace=open('trace.txt').read()
+                os.remove('trace.txt')
+                error=exc_info[3]
+                exc_info=[]
+                return (error,error_instance,trace)
+
+    def logout(self):
+        exc_info=[]
+        try:
+            user=keyring.get_password(self.service_name,USER_RECOVER_KEY)
+            keyring.delete_password(self.service_name,user)
+            keyring.delete_password(self.service_name,USER_RECOVER_KEY)
+            return ('SUCCESS',0,0)
+        except keyring.errors.PasswordDeleteError:
+            exc_info=[i for i in sys.exc_info()]
+            exc_info.append('PSDEL_ERROR')
+        except Exception:
+            exc_info=[i for i in sys.exc_info()]
+            exc_info.append('UNKN_ERROR')
+        finally:
+            if not exc_info==[]:
+                error_instance=exc_info[1].__repr__()
+                traceback.print_tb(exc_info[2],file=open('trace.txt','w+'))
+                trace=open('trace.txt').read()
+                os.remove('trace.txt')
+                error=exc_info[3]
+                exc_info=[]
+                return (error,error_instance,trace)
