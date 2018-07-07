@@ -16,46 +16,55 @@ class Main(object):
         self.l_session.grid(row=0,column=9,sticky='e')
 
         self.v_b_login_w=tk.StringVar()
+        self.v_b_attach=tk.StringVar()
         self.v_b_login_w.set('Iniciar sesión...')
+        self.v_b_attach.set('Adjuntar archivo...')
         self.b_login_w=tk.Button(window
             ,width=12
             ,command=self.open_login
             ,textvariable=self.v_b_login_w)
         self.b_attach=tk.Button(window
-            ,text='Adjuntar archivo...'
             ,width=15
-            ,command=self.attach)
+            ,command=self.attach,
+            textvariable=self.v_b_attach)
         self.b_login_w.grid(row=0,column=10)
-        self.b_attach.grid(row=4,column=9,sticky='e')
+        self.b_attach.grid(row=5,column=10,sticky='e')
 
         self.l_to=tk.Label(window,text='Para:',width=1,anchor='w')
         self.l_cc=tk.Label(window,text='CC:',width=1,anchor='w')
         self.l_cco=tk.Label(window,text='CCO:',width=1,anchor='w')
+        self.l_att=tk.Label(window,text='Adj.:',width=1,anchor='w')
         self.l_to.grid(row=1,column=0,sticky='we')
         self.l_cc.grid(row=2,column=0,sticky='we')
         self.l_cco.grid(row=3,column=0,sticky='we')
+        self.l_att.grid(row=4,column=0,sticky='we')
+        self.l_att.grid_forget()
 
         self.v_e_to=tk.StringVar()
         self.v_e_cc=tk.StringVar()
         self.v_e_cco=tk.StringVar()
+        self.v_e_att=tk.StringVar()
         self.e_to=tk.Entry(window,textvariable=self.v_e_to)
         self.e_cc=tk.Entry(window,textvariable=self.v_e_cc)
         self.e_cco=tk.Entry(window,textvariable=self.v_e_cco)
+        self.e_att=tk.Entry(window,textvariable=self.v_e_att)
         self.e_to.grid(row=1,column=1,sticky='we',columnspan=9)
         self.e_cc.grid(row=2,column=1,sticky='we',columnspan=9)
         self.e_cco.grid(row=3,column=1,sticky='we',columnspan=9)
+        self.e_att.grid(row=4,column=1,sticky='we',columnspan=9)
+        self.e_att.grid_forget()
 
         self.l_body=tk.Label(window,text='Cuerpo del Email:',anchor='w')
-        self.l_body.grid(row=4,column=0,sticky='we',columnspan=9)
+        self.l_body.grid(row=5,column=0,sticky='we',columnspan=9)
 
         self.t_body=tk.Text(window,height=6,width=60)
-        self.t_body.grid(row=5,column=0,rowspan=6,columnspan=10)
+        self.t_body.grid(row=6,column=0,rowspan=6,columnspan=10)
 
         self.b_send=tk.Button(window
             ,text='Enviar'
             ,width=10
             ,command=self.send_mail)
-        self.b_send.grid(row=9,column=10,rowspan=2,sticky='nesw')
+        self.b_send.grid(row=10,column=10,rowspan=2,sticky='nesw')
 
     def open_login(self):
         if self.v_b_login_w.get()=='Iniciar sesión...':
@@ -71,7 +80,17 @@ class Main(object):
         pass
 
     def attach(self):
-        pass
+        if self.v_b_attach.get()=='Adjuntar archivo...':
+            self.l_att.grid(row=4,column=0,sticky='we')
+            self.e_att.grid(row=4,column=1,sticky='we',columnspan=9)
+            self.b_attach.grid(row=4,column=10,sticky='e')
+            self.v_b_attach.set('Retirar archivo')
+        elif self.v_b_attach.get()=='Retirar archivo':
+            self.l_att.grid_forget()
+            self.e_att.grid_forget()
+            self.b_attach.grid(row=5,column=10,sticky='e')
+            self.v_b_attach.set('Adjuntar archivo...')
+
 
 class Login_window(object):
     def __init__(self,window,parent):

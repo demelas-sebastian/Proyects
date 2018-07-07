@@ -12,7 +12,8 @@ import keyring
 #consider using Outlook REST API instead of storing passwords
 #using keyring for pass storage... for now
 
-USER_RECOVER_KEY='magical_user_recovering_key' #maybe change this to a hash generated at runtime?
+#maybe change this to a hash generated at runtime?
+USER_RECOVER_KEY='magical_user_recovering_key'
 
 class Login(object):
     def login(self):
