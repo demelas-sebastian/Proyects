@@ -34,37 +34,42 @@ class Main(object):
         self.l_cc=tk.Label(window,text='CC:',width=1,anchor='w')
         self.l_cco=tk.Label(window,text='CCO:',width=1,anchor='w')
         self.l_att=tk.Label(window,text='Adj.:',width=1,anchor='w')
+        self.l_subject=tk.Label(window,text='Asunto:',width=1,anchor='w')
         self.l_to.grid(row=1,column=0,sticky='we')
         self.l_cc.grid(row=2,column=0,sticky='we')
         self.l_cco.grid(row=3,column=0,sticky='we')
         self.l_att.grid(row=4,column=0,sticky='we')
         self.l_att.grid_forget()
+        self.l_subject.grid(row=5,column=0,sticky='we')
 
         self.v_e_to=tk.StringVar()
         self.v_e_cc=tk.StringVar()
         self.v_e_cco=tk.StringVar()
         self.v_e_att=tk.StringVar()
+        self.v_e_subject=tk.StringVar()
         self.e_to=tk.Entry(window,textvariable=self.v_e_to)
         self.e_cc=tk.Entry(window,textvariable=self.v_e_cc)
         self.e_cco=tk.Entry(window,textvariable=self.v_e_cco)
         self.e_att=tk.Entry(window,textvariable=self.v_e_att)
+        self.e_subject=tk.Entry(window,textvariable=self.v_e_subject)
         self.e_to.grid(row=1,column=1,sticky='we',columnspan=9)
         self.e_cc.grid(row=2,column=1,sticky='we',columnspan=9)
         self.e_cco.grid(row=3,column=1,sticky='we',columnspan=9)
         self.e_att.grid(row=4,column=1,sticky='we',columnspan=9)
         self.e_att.grid_forget()
+        self.e_subject.grid(row=5,column=1,sticky='we',columnspan=9)
 
         self.l_body=tk.Label(window,text='Cuerpo del Email:',anchor='w')
-        self.l_body.grid(row=5,column=0,sticky='we',columnspan=9)
+        self.l_body.grid(row=6,column=0,sticky='we',columnspan=9)
 
         self.t_body=tk.Text(window,height=6,width=60)
-        self.t_body.grid(row=6,column=0,rowspan=6,columnspan=10)
+        self.t_body.grid(row=7,column=0,rowspan=6,columnspan=10)
 
         self.b_send=tk.Button(window
             ,text='Enviar'
             ,width=10
             ,command=self.send_mail)
-        self.b_send.grid(row=10,column=10,rowspan=2,sticky='nesw')
+        self.b_send.grid(row=11,column=10,rowspan=2,sticky='nesw')
 
     def open_login(self):
         if self.v_b_login_w.get()=='Iniciar sesión...':
@@ -81,15 +86,20 @@ class Main(object):
 
     def attach(self):
         if self.v_b_attach.get()=='Adjuntar archivo...':
-            self.l_att.grid(row=4,column=0,sticky='we')
-            self.e_att.grid(row=4,column=1,sticky='we',columnspan=9)
-            self.b_attach.grid(row=4,column=10,sticky='e')
-            self.v_b_attach.set('Retirar archivo')
+            res=filedialog.askopenfilenames(parent=self.window)
+            if not res=='':
+                self.l_att.grid(row=4,column=0,sticky='we')
+                self.e_att.grid(row=4,column=1,sticky='we',columnspan=9)
+                self.b_attach.grid(row=4,column=10,sticky='e')
+                self.v_b_attach.set('Retirar archivo')
+                self.v_e_att.set(' | '.join([i.split("/")[-1] for i in res]))
+
         elif self.v_b_attach.get()=='Retirar archivo':
             self.l_att.grid_forget()
             self.e_att.grid_forget()
             self.b_attach.grid(row=5,column=10,sticky='e')
             self.v_b_attach.set('Adjuntar archivo...')
+            self.v_e_att.set('')
 
 
 class Login_window(object):
