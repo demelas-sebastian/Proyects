@@ -15,7 +15,7 @@ import keyring
 #maybe change this to a hash generated at runtime?
 USER_RECOVER_KEY='magical_user_recovering_key'
 
-class Login(object):
+class Login():
     def login(self):
         self.e_user.config(state=tk.DISABLED)
         self.e_pass.config(state=tk.DISABLED)
@@ -73,3 +73,52 @@ class Login(object):
                 error=exc_info[3]
                 exc_info=[]
                 return (error,error_instance,trace)
+
+class Mail(object):
+    def __init__(self,window,parent,subject=None,to=None,_from=None,msg=None):
+        self.window=window
+        self.parent=parent
+        self.msg=MIMEMultipart()
+        if not subject==None:
+            self.msg['Subject']=subject
+        if not to==None:
+            self.msg['To']=to
+        if not _from==None:
+            self.msg['From']=_from
+        if not msg==None:
+            self.body=MIMEText(msg,'html')
+            self.msg.attach(self.body)
+
+    def attach_file(self,filenames):
+        self.filenames=filenames
+        for i in self.filenames:
+            file=MIMEApplication(open(i,'rb').read())
+            file.add_header('Content-Disposition','attachment',filename=i.split('/')[-1])
+            self.msg.attach(file)
+
+    def send_mail(self):
+        self.msg['Subject']=self.parent.e_subject.get()
+        self.msg['To']=self.parent.e_to.get()
+        self.msg['From']=self.parent.e_from.get()
+        self.body=MIMEText(self.parent.t_body.get(),'html')
+        self.ms.attach(self.body)
+        try:
+            self.connect()=='OK'
+            #send mail here
+        except:
+            #shit happens
+        finally:
+            try:
+                self.server.quit()
+            except:
+                #whatever idc
+                pass
+
+    def connect(self):
+        self.server=smtplib.SMTP('smtp.office365.com',587)
+        self.server.ehlo()
+        self.server.starttls(context=ssl.create_default_context())
+        self.server.login(
+            keyring.get_password(self.parent.service_name,USER_RECOVER_KEY),
+            keyring.get_password(self.parent.service_name,
+                keyring.get_password(self.parent.service_name,USER_RECOVER_KEY)))

@@ -1,14 +1,17 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
-import pythonmail_back as back
 from pythonmail_back import Login
+from pythonmail_back import Mail
 
 class Main(object):
     def __init__(self,window):
         self.window=window
-        self.service_name='Automatizador de Mailing - Main'
-        self.window.wm_title('Automatizador de Mailing - Sebastian Demelas')
+        self.service_name='AutoMailing - Sebastian Demelas'
+        self.window.wm_title('AutoMailing - Sebastian Demelas')
+        self.mail=Mail(window,self)
+
+        window.protocol('WM_DELETE_WINDOW',self.close)
 
         self.v_l_session=tk.StringVar()
         self.v_l_session.set('')
@@ -42,16 +45,11 @@ class Main(object):
         self.l_att.grid_forget()
         self.l_subject.grid(row=5,column=0,sticky='we')
 
-        self.v_e_to=tk.StringVar()
-        self.v_e_cc=tk.StringVar()
-        self.v_e_cco=tk.StringVar()
-        self.v_e_att=tk.StringVar()
-        self.v_e_subject=tk.StringVar()
-        self.e_to=tk.Entry(window,textvariable=self.v_e_to)
-        self.e_cc=tk.Entry(window,textvariable=self.v_e_cc)
-        self.e_cco=tk.Entry(window,textvariable=self.v_e_cco)
-        self.e_att=tk.Entry(window,textvariable=self.v_e_att)
-        self.e_subject=tk.Entry(window,textvariable=self.v_e_subject)
+        self.e_to=tk.Entry(window)
+        self.e_cc=tk.Entry(window)
+        self.e_cco=tk.Entry(window)
+        self.e_att=tk.Entry(window)
+        self.e_subject=tk.Entry(window)
         self.e_to.grid(row=1,column=1,sticky='we',columnspan=9)
         self.e_cc.grid(row=2,column=1,sticky='we',columnspan=9)
         self.e_cco.grid(row=3,column=1,sticky='we',columnspan=9)
@@ -82,31 +80,53 @@ class Main(object):
             Logout_window(self.top,self)
 
     def send_mail(self):
-        pass
+        if self.e_subject.get()=='':
+            msg='No especificó ningun asunto. ¿Desea continuar?'
+            title='Ningun asunto'
+            if messagebox.askokcancel(parent=self.window,message=msg,title=title):
+                self.mail.send_mail()
+            else:
+                print('cancel')
+        else:
+            self.mail.send_mail()
+            print('sending')
+
+    def clear_fields(self):
+        for i in self.window.children.keys():
+            if i[:6]=='!entry':
+                self.window.children[i].delete(0,tk.END)
+            elif i[:5]=='!text':
+                self.window.children[i].delete(1.0,tk.END)
 
     def attach(self):
         if self.v_b_attach.get()=='Adjuntar archivo...':
-            res=filedialog.askopenfilenames(parent=self.window)
-            if not res=='':
+            self.file_att=filedialog.askopenfilenames(parent=self.window)
+            if not self.file_att=='':
+                self.mail.attach_file(self.file_att)
                 self.l_att.grid(row=4,column=0,sticky='we')
                 self.e_att.grid(row=4,column=1,sticky='we',columnspan=9)
                 self.b_attach.grid(row=4,column=10,sticky='e')
                 self.v_b_attach.set('Retirar archivo')
-                self.v_e_att.set(' | '.join([i.split("/")[-1] for i in res]))
+                self.e_att.delete(0,tk.END)
+                self.e_att.insert(tk.END,' | '.join([i.split("/")[-1] for i in self.file_att]))
 
         elif self.v_b_attach.get()=='Retirar archivo':
             self.l_att.grid_forget()
             self.e_att.grid_forget()
             self.b_attach.grid(row=5,column=10,sticky='e')
             self.v_b_attach.set('Adjuntar archivo...')
-            self.v_e_att.set('')
+            self.e_att.delete(0,tk.END)
+            self.e_att.insert(tk.END,'')
 
+    def close(self):
+        del self.mail
+        self.window.destroy()
 
-class Login_window(object):
+class Login_window(Main):
     def __init__(self,window,parent):
         self.window=window
         self.parent=parent
-        self.service_name='Automatizador de Mailing - Login|Send'
+        self.service_name='AutoMailing - Sebastian Demelas'
 
         self.l_user=tk.Label(window,text='Usuario')
         self.l_pass=tk.Label(window,text='Contraseña')
@@ -142,11 +162,11 @@ class Login_window(object):
         elif result[0]=='UNKN_ERROR':
             messagebox.showerror('Error desconocido',result[2]+'\n'+result[1])
 
-class Logout_window(object):
+class Logout_window(Main):
     def __init__(self,window,parent):
         self.window=window
         self.parent=parent
-        self.service_name='Automatizador de Mailing - Login|Send'
+        self.service_name='AutoMailing - Sebastian Demelas'
 
         self.l_msg=tk.Label(window,text='¿Desea cerrar sesión?')
         self.l_msg.grid(row=0,column=0,columnspan=2)
