@@ -99,13 +99,17 @@ class Mail(object):
     def send_mail(self):
         self.msg['Subject']=self.parent.e_subject.get()
         self.msg['To']=self.parent.e_to.get()
-        self.msg['From']=self.parent.e_from.get()
-        self.body=MIMEText(self.parent.t_body.get(),'html')
-        self.ms.attach(self.body)
+        self.msg['From']=self.parent.this_address+'no session'#remove for production
+        self.msg['CC']=self.parent.e_cc.get()
+        self.body=MIMEText(self.parent.t_body.get(1.0,tk.END),'html')
+        self.msg.attach(self.body)
+        print(self.msg.items())
+        """
         try:
-            self.connect()=='OK'
+            self.connect()
             #send mail here
         except:
+            pass
             #shit happens
         finally:
             try:
@@ -113,7 +117,7 @@ class Mail(object):
             except:
                 #whatever idc
                 pass
-
+"""
     def connect(self):
         self.server=smtplib.SMTP('smtp.office365.com',587)
         self.server.ehlo()
