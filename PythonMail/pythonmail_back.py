@@ -99,7 +99,7 @@ class Mail(object):
     def send_mail(self):
         self.msg['Subject']=self.parent.e_subject.get()
         self.msg['To']=self.parent.e_to.get()
-        self.msg['From']=self.parent.this_address+'no session'#remove for production
+        self.msg['From']=self.parent.this_address+'no address'#remove for production
         self.msg['CC']=self.parent.e_cc.get()
         self.body=MIMEText(self.parent.t_body.get(1.0,tk.END),'html')
         self.msg.attach(self.body)
@@ -126,3 +126,43 @@ class Mail(object):
             keyring.get_password(self.parent.service_name,USER_RECOVER_KEY),
             keyring.get_password(self.parent.service_name,
                 keyring.get_password(self.parent.service_name,USER_RECOVER_KEY)))
+
+class Params():
+    def search_params(self):
+        i=-1
+        text=self.parent.t_body.get(1.0,tk.END)
+        params_index_beg=[]
+        params_index_end=[]
+        cycle=0
+        error=False
+        while True:
+            next_beg=text.find('<<',i+1)
+            if not next_beg==-1:
+                params_index_beg.append(next_beg)
+                i=next_beg
+            else:
+                break
+        i=-1
+        while True:
+            next_end=text.find('>>',i+1)
+            if not next_end==-1:
+                params_index_end.append(next_end)
+                i=next_end
+            else:
+                break
+        if len(params_index_beg)==len(params_index_end):
+            prev=-1
+            for i in range(len(params_index_beg)):
+                a=params_index_beg[i]
+                b=params_index_end[i]
+                if (not prev<a) or (not a<b):
+                    error=True
+                    break
+                else:
+                    prev=b
+        else:
+            error=True
+        if error:
+            return ('ERROR',None)
+        else:
+            return ('OK',[f'{text[i+2:j]}' for i,j in zip(params_index_beg,params_index_end)])

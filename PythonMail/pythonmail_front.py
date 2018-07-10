@@ -3,6 +3,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 from pythonmail_back import Login
 from pythonmail_back import Mail
+from pythonmail_back import Params
 
 class Main(object):
     def __init__(self,window):
@@ -74,10 +75,16 @@ class Main(object):
         self.t_body=tk.Text(window,height=6,width=60)
         self.t_body.grid(row=7,column=0,rowspan=6,columnspan=10)
 
+        self.b_asoc=tk.Button(window
+            ,text='Asociar\ncampos...'
+            ,width='10'
+            ,command=self.open_params)
+        self.b_asoc.grid(row=8,column=10,sticky='we')
+
         self.b_send=tk.Button(window
             ,text='Enviar'
             ,width=10
-            ,command=self.send_mail)
+            ,command=self.test_subject)
         self.b_send.grid(row=11,column=10,rowspan=2,sticky='nesw')
 
     def open_login(self):
@@ -95,7 +102,7 @@ class Main(object):
         self.top_to.title('Seleccionar destinatarios - AutoMailing')
         To_window(self.top_to,self)
 
-    def send_mail(self):
+    def test_subject(self):
         if self.e_subject.get()=='':
             msg='No especificó ningun asunto. ¿Desea continuar?'
             title='Ningun asunto'
@@ -106,6 +113,11 @@ class Main(object):
         else:
             self.mail.send_mail()
             print('sending')
+
+    def open_params(self):
+        self.top_params=tk.Toplevel(self.window)
+        self.top_params.title('Asociacion de parametros - AutoMailing')
+        Params_window(self.top_params,self)
 
     def clear_fields(self):
         for i in self.window.children.keys():
@@ -247,6 +259,52 @@ class To_window(Main):
             ,', '.join([f'z{i+1}.director@scouts.org.ar' for i in self.lb_zonas.curselection()]))
         self.parent.to_indexes=self.lb_zonas.curselection()
         self.window.destroy()
+
+class Params_window(Main):
+    def __init__(self,window,parent):
+        self.window=window
+        self.parent=parent
+        self.service_name='AutoMailing - Sebastian Demelas'
+
+        self.l_params=tk.Label(window,text='Parametros encontrados:',anchor='w')
+        self.l_params.grid(row=0,column=0,columnspan=2,sticky='we')
+
+        self.lb_params=tk.Listbox(window)
+        self.lb_params.grid(row=1,column=0,rowspan=2)
+
+        self.sb_params=tk.Scrollbar(window)
+        self.sb_params.grid(row=1,column=1,rowspan=2,sticky='ns')
+
+        self.lb_params.configure(yscrollcommand=self.sb_params.set)
+        self.sb_params.configure(command=self.lb_params.yview)
+
+        self.l_asoc=tk.Label(window,text='Asociaciones encontradas:')
+        self.l_asoc.grid(row=0,column=2,columnspan=2,sticky='we')
+
+        self.l_file=tk.Label(window,text='Archivo:',anchor='w')
+        self.l_column=tk.Label(window,text='Columna:',anchor='w')
+        self.l_file.grid(row=1,column=2,sticky='we')
+        self.l_column.grid(row=2,column=2,sticky='we')
+
+        self.e_file=tk.Entry(window,width=33)
+        self.e_column=tk.Entry(window,width=33)
+        self.e_file.grid(row=1,column=3,sticky='we')
+        self.e_column.grid(row=2,column=3,sticky='we')
+
+        self.params=Params.search_params(self)
+        if self.params[0]=='ERROR':
+            msg='Hubo un error en la definición de parametros a asociar.\nPor favor revise que no haya ninguna definición sin cerrar'
+            messagebox.showerror('Error',msg)
+            self.window.destroy()
+        elif self.params[0]=='OK':
+            if not self.params[1]==[]:
+                self.lb_params.delete(0,tk.END)
+                for i in self.params[1]:
+                    self.lb_params.insert(tk.END,i)
+            else:
+                msg='No hay parametros a asociar'
+                messagebox.showerror('Error',msg)
+                self.window.destroy()
 
 main=tk.Tk()
 Main(main)
